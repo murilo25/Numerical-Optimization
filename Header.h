@@ -6,6 +6,7 @@
 #include <iomanip>
 
 #define DEBUG 1
+#define DEBUG_LENGTH_STEP_BY_STEP 0
 #define DIMENSION 2
 
 enum methods { STEEPEST_DESCENT, NEWTON };
@@ -28,7 +29,7 @@ double L2_norm(std::vector<double> states)
 }
 
 
-double eval_f_at_x(double x1, double x2)
+double eval_f(double x1, double x2)
 {
 	return 100 * pow( (x2 - (x1 * x1)), 2) + pow((1 - x1), 2);
 }
@@ -101,8 +102,8 @@ std::vector<double> findSearchDirection(std::vector<double> states, int method)
 	{
 		case STEEPEST_DESCENT:
 			/* normalized */
-			//dir[0] = df_dx1_at_x(states[0], states[1]) / abs(df_dx1_at_x(states[0], states[1]));
-			//dir[1] = df_dx2_at_x(states[0], states[1]) / abs(df_dx2_at_x(states[0], states[1]));
+			dir[0] = df_dx1_at_x(states[0], states[1]) / abs(df_dx1_at_x(states[0], states[1]));
+			dir[1] = df_dx2_at_x(states[0], states[1]) / abs(df_dx2_at_x(states[0], states[1]));
 			/* non normalized */
 			dir[0] = df_dx1_at_x(states[0], states[1]);
 			dir[1] = df_dx2_at_x(states[0], states[1]);
@@ -119,9 +120,9 @@ std::vector<double> findSearchDirection(std::vector<double> states, int method)
 			std::cout << "Unknown method\n";
 			break;
 	}
-
-
-
+	//multiply by -1 to convert gradient from ascent to descent
+	dir[0] = -dir[0];
+	dir[1] = -dir[1];
 	return dir;
 }
 
@@ -129,32 +130,35 @@ std::vector<double> findSearchDirection(std::vector<double> states, int method)
 double findStepLength(std::vector<double> p, std::vector<double> states, double a_bar)
 {
 	double a;	// step length to be calculated
-	double rho = 0.8;
-	double c = 0.5;
+	double rho = 0.5;
+	double c = 0.15;
 	
 	a = a_bar;
 
-	double f_at_x_plus_ap = eval_f_at_x((states[0] + a * p[0]), (states[1] + a * p[1]) );	// f(x_k + a * p_k)
-	double f_at_x = eval_f_at_x(states[0], states[1]);	// f(x_k)
-	double grad_f_times_pk = df_dx1_at_x(states[0], states[1]) * p[0] + df_dx2_at_x(states[0], states[1]) * p[1];	// transpose(grad_f_x) * p_k
+	//p[0] = -p[0];
+	//p[1] = -p[1];
+
+	double f_at_x_plus_ap = eval_f((states[0] + a * p[0]), (states[1] + a * p[1]) );	// f(x_k + a * p_k)
+	double f_at_x = eval_f(states[0], states[1]);	// f(x_k)
+	double aux1 = df_dx1_at_x(states[0], states[1]);
+	double aux2 = df_dx2_at_x(states[0], states[1]);
+	double grad_f_times_pk = aux1 * p[0] + aux2 * p[1];	// transpose(grad_f_x) * p_k
 	double secondTerm = c * a * grad_f_times_pk;
-
-	//std::cout << "x1 = " << states[0] << " x2 = " << states[1] << " a = " << a << " p[0] = " << p[0] << " p[1] = " << p[1] << std::endl;
-	//std::cout << "x1+a*p0 = " << (states[0] + a * p[0]) << " x2 + a * p1 = " << (states[1] + a * p[1]) << std::endl;
-	//std::cout << f_at_x_plus_ap << " <= " << f_at_x << " + " << grad_f_times_pk << " "  << std::endl;
-	a = a_bar;
-	//while (1);
 	
-	while ( f_at_x_plus_ap <= f_at_x + secondTerm )	// Backtracking line search condition
-	{
-		std::cout << states[0] << " " << a << " " << p[0] << " " << states[1] << " " << p[1] << std::endl;
+	#if DEBUG_LENGTH_STEP_BY_STEP
+		std::cout << "F(x+ap)\t\t" << "F(x)\t\t" << "secondTerm\t\t" << "step" << std::endl;
+	#endif
 
+	while ( f_at_x_plus_ap > f_at_x + secondTerm )	// Backtracking line search condition
+	{
+		#if DEBUG_LENGTH_STEP_BY_STEP
+			std::cout << f_at_x_plus_ap << "\t\t" << f_at_x << "\t\t" << secondTerm << "\t\t" << a << std::endl;
+		#endif
 		a = rho * a;
-		f_at_x_plus_ap = eval_f_at_x( (states[0] + a * p[0]), (states[1] + a * p[1]) );
-		f_at_x = eval_f_at_x(states[0], states[1]);
-		grad_f_times_pk = df_dx1_at_x(states[0], states[1]) * p[0] + df_dx2_at_x(states[0], states[1]) * p[1];
+		f_at_x_plus_ap = eval_f( (states[0] + a * p[0]), (states[1] + a * p[1]) );
+		//f_at_x = eval_f(states[0], states[1]);	// no need to update
+		// grad_f_times_pk = df_dx1_at_x(states[0], states[1]) * p[0] + df_dx2_at_x(states[0], states[1]) * p[1]; // no need to update
 		secondTerm = c * a * grad_f_times_pk;
-		std::cout << a << "\n";
 
 	}
 	
@@ -182,7 +186,7 @@ std::vector<double> optmization (int iterMax, double tol, std::vector<double> ic
 
 	while (delta > tol)
 	{
-	
+		//std::cout << "iter " << k << "\n";
 		previous_x1 = star[0];	// store current x1
 		previous_x2 = star[1]; // store current x2
 
@@ -192,7 +196,7 @@ std::vector<double> optmization (int iterMax, double tol, std::vector<double> ic
 
 		for (int i = 0; i < DIMENSION; i++)		// for each dimension
 		{
-			star[i] = star[i] - a * p[i];	// take a step of length a and direction p[i]
+			star[i] = star[i] + a * p[i];	// take a step of length a and direction p[i]
 		}
 
 		// Euclidian distance between step k + 1 and k to check if solution converged
