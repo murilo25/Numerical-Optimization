@@ -10,6 +10,14 @@
 
 int main()
 {
-    std::cout << "Hello World!\n";
+    std::vector<double> result;
+    std::vector<double> ic;
+    ic.push_back(0);
+    ic.push_back(0);
+
+    result = optmization(100, 0.00001, ic, STEEPEST_DESCENT);
+
+    std::cout << "x* = " << result[0] << "\ncost = " << result[2] << std::endl;
+
     return 0;
 }
