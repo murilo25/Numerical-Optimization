@@ -18,8 +18,11 @@ std::vector<double> findSearchDirection(std::vector<double> states)
 		dir.push_back(0);
 		dir.push_back(0);
 	}
-	dir[0] = 2 * states[0];	// cost function (x^2 + y^2 + 10) -> derivative: [2x ; 2y]
-	dir[1] = 2 * states[1];
+	//dir[0] = 2 * states[0];	// cost function (x^2 + y^2 + 10) -> derivative: [2x ; 2y]
+	//dir[1] = 2 * states[1];
+
+	dir[0] = - 400 * states[0] * (states[1] - pow(states[0],2)) - 2 * (1 - states[0]);
+	dir[1] = 200 * (states[1] - states[0] * states[0]);
 
 	return dir;
 }
@@ -32,8 +35,8 @@ std::vector<double> backtracking()
 		step.push_back(0);
 		step.push_back(0);
 	}
-	step[0] = 0.1;
-	step[1] = 0.1;
+	step[0] = 0.002;
+	step[1] = 0.002;
 
 	return step;
 }
@@ -89,7 +92,8 @@ std::vector<double> optmization (int iterMax, double tol, std::vector<double> ic
 				}
 
 	#if DEBUG
-				star[2] = pow(star[0], 2) + pow(star[1], 2) + 10;	// Calculate cost at iteration k+1
+				//star[2] = pow(star[0], 2) + pow(star[1], 2) + 10;	// Calculate cost at iteration k+1
+				star[2] = 100 * (star[1] - star[0] * star[0]) + (1 - star[0]) * (1 - star[0]);
 				std::cout << std::fixed;
 				std::cout << std::setprecision(6);
 				std::cout << k << "\t\t\t" << star[0] << " " << star[1] << "\t\t\t" << star[2] 
@@ -115,7 +119,8 @@ std::vector<double> optmization (int iterMax, double tol, std::vector<double> ic
 	else	// if converged, calculate cost
 	{	
 		std::cout << "Optmization converged\n";
-		star[2] = pow(star[0], 2) + pow(star[1], 2) + 10;	// Calculate cost at iteration k+1 ( cost function (x^2 + y^2 + 10) )
+		//star[2] = pow(star[0], 2) + pow(star[1], 2) + 10;	// Calculate cost at iteration k+1 ( cost function (x^2 + y^2 + 10) )
+		star[2] = 100 * (star[1] - star[0] * star[0]) + (1 - star[0]) * (1 - star[0]);
 	}
 	
 	return star;
