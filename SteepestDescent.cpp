@@ -12,12 +12,12 @@ int main()
 {
     std::vector<double> result;
     std::vector<double> ic;
-    ic.push_back(0);
-    ic.push_back(0);
+    ic.push_back(10);
+    ic.push_back(-10);
 
     result = optmization(100, 0.00001, ic, STEEPEST_DESCENT);
 
-    std::cout << "x* = " << result[0] << "\ncost = " << result[2] << std::endl;
+    std::cout << "x1* = " << result[0] << "\nx2* = " << result[1] << "\ncost = " << result[2] << std::endl;
 
     return 0;
 }
