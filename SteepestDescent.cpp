@@ -13,7 +13,7 @@
 #define TOLERANCE 0.00001
 #define INITIAL_CONDITION {1.2,1.2}
 #define INITIAL_STEP_LENGTH 1
-#define SEARCH_METHOD NEWTON    //STEEPEST_DESCENT or NEWTON
+#define SEARCH_METHOD STEEPEST_DESCENT   //STEEPEST_DESCENT or NEWTON
 int main()
 {
     std::vector<double> result;

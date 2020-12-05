@@ -10,6 +10,18 @@
 
 enum methods { STEEPEST_DESCENT, NEWTON };
 
+void printStep(std::vector<double> star, double delta, double a, int k)
+{
+#if DEBUG
+	star[2] = 100 * (star[1] - star[0] * star[0]) + (1 - star[0]) * (1 - star[0]);	// Calculate cost at iteration k+1
+	std::cout << std::fixed;
+	std::cout << std::setprecision(6);
+	std::cout << k << "\t\t" << star[0] << " " << star[1] << "\t\t" << star[2]
+		<< "\t\t" << delta << "\t\t" << a << std::endl;
+#endif
+	return;
+}
+
 double L2_norm(std::vector<double> states) 
 {
 	return sqrt( (states[0] * states[0]) + (states[1] * states[1]) );
@@ -89,11 +101,11 @@ std::vector<double> findSearchDirection(std::vector<double> states, int method)
 	{
 		case STEEPEST_DESCENT:
 			/* normalized */
-			dir[0] = df_dx1_at_x(states[0], states[1]) / abs(df_dx1_at_x(states[0], states[1]));
-			dir[1] = df_dx2_at_x(states[0], states[1]) / abs(df_dx2_at_x(states[0], states[1]));
+			//dir[0] = df_dx1_at_x(states[0], states[1]) / abs(df_dx1_at_x(states[0], states[1]));
+			//dir[1] = df_dx2_at_x(states[0], states[1]) / abs(df_dx2_at_x(states[0], states[1]));
 			/* non normalized */
-			//dir[0] = df_dx1_at_x(states[0], states[1]);
-			//dir[1] = df_dx2_at_x(states[0], states[1]);
+			dir[0] = df_dx1_at_x(states[0], states[1]);
+			dir[1] = df_dx2_at_x(states[0], states[1]);
 			break;
 		case NEWTON:
 			// search direction is given by grad_f_at_x * (Hessian_f_at_x)^-1
@@ -114,10 +126,9 @@ std::vector<double> findSearchDirection(std::vector<double> states, int method)
 }
 
 
-double findStepLength(std::vector<double> p, std::vector<double> states)
+double findStepLength(std::vector<double> p, std::vector<double> states, double a_bar)
 {
 	double a;	// step length to be calculated
-	double a_bar = 1;
 	double rho = 0.8;
 	double c = 0.5;
 	
@@ -152,95 +163,51 @@ double findStepLength(std::vector<double> p, std::vector<double> states)
 }
 
 
-std::vector<double> optmization (int iterMax, double tol, std::vector<double> ic, double a, int method)
+std::vector<double> optmization (int iterMax, double tol, std::vector<double> ic, double a0, int method)
 {
 	std::vector<double> star; // Will store optimization result x*,f(x*)
 	star.push_back(ic[0]);	// Store initial condition (x1) in star[0]
 	star.push_back(ic[1]);	// Store initial condition (x2) in star[0]
 	star.push_back(9999);	// Initialize cost of function as a high value
 	double delta = 1;
-	double delta_x1 = 1;
-	double delta_x2 = 1;
+	double previous_x1 = 1;
+	double previous_x2 = 1;
 	double k = 0;	//iterator
 	std::vector<double> p; // declare search direction vector
-
-#if DEBUG
-	std::cout << "Iter: \t\t\t x1 & x2: \t\t\t cost: \t\t\t delta: \t\t step: \n";
-#endif
-	switch (method) 
-	{
-		case STEEPEST_DESCENT:	// create function to improve code readability
-			while (delta > tol) 
-			{
-				delta_x1 = star[0];
-				delta_x2 = star[1];
-				
-				p = findSearchDirection(star,STEEPEST_DESCENT);
-				a = findStepLength(p, star);
-
-				for (int i = 0; i < DIMENSION; i++)		// for each dimension
-				{
-					star[i] = star[i] - a * p[i];	// Steepest descent (gradient descent)
-				}
-
-				// Euclidian distance between step k + 1 and k
-				delta = abs( sqrt( pow(star[0] - delta_x1,2) + pow(star[1] - delta_x2,2) ));
-
-
-				k += 1;	// Increment iteration
-
-				if (k > iterMax) 
-				{	// Check if it has exceed maximum number of iterations
-					delta = -1;
-				}
+	double a;	// step length
 
 	#if DEBUG
-				star[2] = 100 * (star[1] - star[0] * star[0]) + (1 - star[0]) * (1 - star[0]);	// Calculate cost at iteration k+1
-				std::cout << std::fixed;
-				std::cout << std::setprecision(6);
-				std::cout << k << "\t\t" << star[0] << " " << star[1] << "\t\t" << star[2] 
-					<< "\t\t" << delta << "\t\t" << a << std::endl; 
+		std::cout << "Iter: \t\t\t x1 & x2: \t\t cost: \t\t\t delta: \t\t step: \n";
 	#endif
 
-			}
-			break;
-		case NEWTON:
-			while(delta > tol)
-			{ 
-				double delta_x = star[0];
-				double delta_y = star[1];
+	while (delta > tol)
+	{
+	
+		previous_x1 = star[0];	// store current x1
+		previous_x2 = star[1]; // store current x2
 
-				p = findSearchDirection(star,NEWTON);
-				a = findStepLength(p, star);
+		p = findSearchDirection(star, method);
+		a = findStepLength(p, star, a0);
+		//a = 0.001;
 
-				for (int i = 0; i < DIMENSION; i++)		// for each dimension
-				{
-					star[i] = star[i] - a * p[i];	// Steepest descent (gradient descent)
-				}
-
-				// Euclidian distance between step k + 1 and k
-				delta = abs(sqrt(pow(star[0] - delta_x1, 2) + pow(star[1] - delta_x2, 2)));
-
-				k += 1;
-
-				if (k > iterMax)
-				{	// Check if it has exceed maximum number of iterations
-					delta = -1;
-				}
-
-#if DEBUG
-				star[2] = 100 * (star[1] - star[0] * star[0]) + (1 - star[0]) * (1 - star[0]);	// Calculate cost at iteration k+1
-				std::cout << std::fixed;
-				std::cout << std::setprecision(6);
-				std::cout << k << "\t\t" << star[0] << " " << star[1] << "\t\t" << star[2]
-					<< "\t\t" << delta << "\t\t" << a << std::endl;
-#endif
-			}
-			break;
-		default:
-			std::cout << "Unknown method\n";
-			break;
+		for (int i = 0; i < DIMENSION; i++)		// for each dimension
+		{
+			star[i] = star[i] - a * p[i];	// take a step of length a and direction p[i]
 		}
+
+		// Euclidian distance between step k + 1 and k to check if solution converged
+		delta = abs(sqrt(pow(star[0] - previous_x1, 2) + pow(star[1] - previous_x2, 2)));
+
+		k += 1;	// Increment iteration
+
+		if (k > iterMax)
+		{	// Check if it has exceed maximum number of iterations
+			delta = -1;
+		}
+
+		printStep(star, delta, a, k);
+
+	}
 
 	if (delta > tol || k > iterMax)		// if optimization did not converge, set result to -1 
 	{	
@@ -257,3 +224,4 @@ std::vector<double> optmization (int iterMax, double tol, std::vector<double> ic
 	
 	return star;
 }
+
