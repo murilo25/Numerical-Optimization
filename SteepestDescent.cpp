@@ -9,17 +9,22 @@
 #include "Header.h"
 //#include "math_functions.h"
 
+#define MAX_STEPS 9000
+#define TOLERANCE 0.00001
+#define INITIAL_CONDITION {1.2,1.2}
+#define INITIAL_STEP_LENGTH 1
+#define SEARCH_METHOD NEWTON    //STEEPEST_DESCENT or NEWTON
 int main()
 {
     std::vector<double> result;
-    std::vector<double> ic;
-    ic.push_back(1.2);
-    ic.push_back(1.2);
+    //std::vector<double> ic;
+    //ic.push_back(1.2);
+    //ic.push_back(1.2);
 
     //result = optmization(9000, 0.00001, ic, STEEPEST_DESCENT);
-    result = optmization(9000, 0.00001, ic, NEWTON);
+    result = optmization(MAX_STEPS, TOLERANCE, INITIAL_CONDITION, INITIAL_STEP_LENGTH, SEARCH_METHOD);
 
-    std::cout << "x1* = " << result[0] << "\nx2* = " << result[1] << "\ncost = " << result[2] << std::endl;
+    std::cout << "\nx1* = " << result[0] << "\nx2* = " << result[1] << "\ncost = " << result[2] << std::endl;
 
     return 0;
 }

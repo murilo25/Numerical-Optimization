@@ -152,7 +152,7 @@ double findStepLength(std::vector<double> p, std::vector<double> states)
 }
 
 
-std::vector<double> optmization (int iterMax, double tol, std::vector<double> ic, int method)
+std::vector<double> optmization (int iterMax, double tol, std::vector<double> ic, double a, int method)
 {
 	std::vector<double> star; // Will store optimization result x*,f(x*)
 	star.push_back(ic[0]);	// Store initial condition (x1) in star[0]
@@ -162,11 +162,10 @@ std::vector<double> optmization (int iterMax, double tol, std::vector<double> ic
 	double delta_x1 = 1;
 	double delta_x2 = 1;
 	double k = 0;	//iterator
-	double a = 1; // Initialize step length
 	std::vector<double> p; // declare search direction vector
 
 #if DEBUG
-	std::cout << "Iter: \t\t\t\t x1 & x2: \t\t\t\t cost: \t\t\t\t delta: \n";
+	std::cout << "Iter: \t\t\t x1 & x2: \t\t\t cost: \t\t\t delta: \t\t step: \n";
 #endif
 	switch (method) 
 	{
@@ -199,8 +198,8 @@ std::vector<double> optmization (int iterMax, double tol, std::vector<double> ic
 				star[2] = 100 * (star[1] - star[0] * star[0]) + (1 - star[0]) * (1 - star[0]);	// Calculate cost at iteration k+1
 				std::cout << std::fixed;
 				std::cout << std::setprecision(6);
-				std::cout << k << "\t\t\t" << star[0] << " " << star[1] << "\t\t\t" << star[2] 
-					<< "\t\t\t" << delta << std::endl;
+				std::cout << k << "\t\t" << star[0] << " " << star[1] << "\t\t" << star[2] 
+					<< "\t\t" << delta << "\t\t" << a << std::endl; 
 	#endif
 
 			}
@@ -233,8 +232,8 @@ std::vector<double> optmization (int iterMax, double tol, std::vector<double> ic
 				star[2] = 100 * (star[1] - star[0] * star[0]) + (1 - star[0]) * (1 - star[0]);	// Calculate cost at iteration k+1
 				std::cout << std::fixed;
 				std::cout << std::setprecision(6);
-				std::cout << k << "\t\t\t" << star[0] << " " << star[1] << "\t\t\t" << star[2]
-					<< "\t\t\t" << delta << std::endl;
+				std::cout << k << "\t\t" << star[0] << " " << star[1] << "\t\t" << star[2]
+					<< "\t\t" << delta << "\t\t" << a << std::endl;
 #endif
 			}
 			break;
