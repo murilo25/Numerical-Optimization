@@ -6,6 +6,7 @@
 
 #define DEBUG 1
 #define DEBUG_LENGTH_STEP_BY_STEP 0
+#define DEBUG_DIRECTION_STEP_BY_STEP 0
 #define DIMENSION 2
 
 enum methods { STEEPEST_DESCENT, NEWTON };
@@ -118,6 +119,9 @@ std::vector<double> findSearchDirection(std::vector<double> states, int method)
 			// Compute (Hessian_f_at_x)^-1 * grad_f_at_x
 			dir[0] = hessianInverse[0][0] * gradient[0] + hessianInverse[0][1] * gradient[1];
 			dir[1] = hessianInverse[1][0] * gradient[0] + hessianInverse[1][1] * gradient[1];
+			/* normalize */
+			//dir[0] = dir[0] / abs(dir[0]);
+			//dir[1] = dir[1] / abs(dir[1]);
 			break;
 		default:
 			std::cout << "Unknown method\n";
@@ -126,6 +130,10 @@ std::vector<double> findSearchDirection(std::vector<double> states, int method)
 	//multiply by -1 to convert gradient from ascent to descent
 	dir[0] = -dir[0];
 	dir[1] = -dir[1];
+
+	#if DEBUG_DIRECTION_STEP_BY_STEP
+		std::cout << dir[0] << "\t" << dir[1] << std::endl;
+	#endif
 	return dir;
 }
 
@@ -189,6 +197,9 @@ std::vector<double> optmization (int iterMax, double tol, std::vector<double> ic
 	
 	#if DEBUG // Display header
 		std::cout << "Iter: \t\t\t x1 & x2: \t\t cost: \t\t\t delta: \t\t step: \n";
+	#endif
+	#if DEBUG_DIRECTION_STEP_BY_STEP // Display header
+		std::cout << "dir[0]:  dir[1]: \n";
 	#endif
 
 	while (delta > tol)		// Optimization loop
