@@ -1,7 +1,7 @@
 // Murilo Augusto Pinheiro
 // 04-Dec-2020
 // Solution for Diamond Kinetics - Dynamics Algorithm Implementation.pdf
-// SteepestDescent.cpp : Minimizes the Rosenbrock function and displays the result.
+// main.cpp : Minimizes the Rosenbrock function and displays the result.
 // optimization.h : Perform line search optimization to minimize the Rosenbrock function.
 // finddirection.h : Calculates the step direction based on method received as an argument. 
 //                   (steepest descent and newton's method)
