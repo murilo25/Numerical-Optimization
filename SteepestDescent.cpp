@@ -1,12 +1,15 @@
 // Murilo Augusto Pinheiro
 // 04-Dec-2020
 // Solution for Diamond Kinetics - Dynamics Algorithm Implementation.pdf
-// SteepestDescent.cpp : This file contains the 'main' function. Program execution begins and ends there.
-// Header.h : This files contains all functions and includes used in this file.
+// SteepestDescent.cpp : Minimizes the Rosenbrock function and displays the result.
+// optimization.h : Perform line search optimization to minimize the Rosenbrock function.
+// finddirection.h : Calculates the step direction based on method received as an argument. 
+//                   (steepest descent and newton's method)
+// findsteplength.h : Calculates the step length direction based on the backtracking line search. 
+// Header.h : Contains helper functions to evaluate f(x) and its derivatives.
 
 
-
-#include "Header.h"
+#include "optimization.h"
 
 #define MAX_STEPS 10000
 #define TOLERANCE 0.00001
